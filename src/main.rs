@@ -43,7 +43,11 @@ async fn repl_handler(bot: Bot, msg: Message) -> ResponseResult<()> {
             let mut send_vid = bot.send_video(msg.chat.id, InputFile::file(video.clone()));
             let is_private = msg.chat.is_private();
             if !is_private {
-                send_vid = send_vid.caption(format!("{}\n{}", sender_name, url));
+                send_vid = send_vid.caption(format!(
+                    "{}\n{}",
+                    sender_name,
+                    msg.text().unwrap_or_default()
+                ));
                 if let Some(ref sender_url) = sender_url {
                     send_vid = send_vid.caption_entities(vec![MessageEntity::text_link(
                         sender_url.clone(),
