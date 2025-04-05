@@ -65,6 +65,13 @@ async fn repl_handler(bot: Bot, msg: Message) -> ResponseResult<()> {
 }
 
 async fn handle_message(msg: &Message) -> Vec<String> {
+    if msg
+        .text()
+        .map(|text| text.contains("bot-ignore"))
+        .unwrap_or(false)
+    {
+        return vec![];
+    }
     if let Some(entities) = msg.parse_entities() {
         entities
             .iter()
