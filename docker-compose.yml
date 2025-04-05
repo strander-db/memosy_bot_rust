@@ -1,0 +1,8 @@
+services:
+  memosy_bot_rust:
+    build: 
+      context: .
+      platforms:
+        - linux/amd64
+        # - linux/arm64
+    image: strander/memosy_bot_rust:latest

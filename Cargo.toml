@@ -1,0 +1,14 @@
+[package]
+name = "memosy_bot_rust"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+teloxide = { version = "0.14.1", features = ["macros"] }
+log = "0.4"
+pretty_env_logger = "0.5"
+tokio = { version = "1.8", features = ["rt-multi-thread", "macros"] }
+yt-dlp = "1.3.2"
+futures = "0.3"
+url = "2.5.4"
+openssl = { version = "0.10.72", features = ["vendored"] }
