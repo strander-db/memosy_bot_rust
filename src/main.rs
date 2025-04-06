@@ -24,6 +24,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     });
     let bot = Bot::from_env();
+    
     let admin_id = env::var("ADMIN_ID").expect("ADMIN_ID is not set");
     bot.send_message(admin_id, "Bot started").await?;
     teloxide::repl(bot, move |bot: Bot, msg: Message| async move {
@@ -41,7 +42,7 @@ async fn repl_handler(bot: Bot, msg: Message) -> ResponseResult<()> {
     let urls = handle_message(&msg);
     log::info!("Handled message in: {:?}", timer.elapsed());
     for url in urls {
-        let video = download_video(url.clone()).await;
+        let video = download_video(url.clone());
         log::info!("Downloaded video in: {:?}", timer.elapsed());
         if let Ok(video) = video {
             let mut send_vid = bot.send_video(msg.chat.id, InputFile::file(video.clone()));
@@ -92,7 +93,7 @@ fn handle_message(msg: &Message) -> Vec<String> {
     }
 }
 
-async fn download_video(url: String) -> Result<PathBuf, Box<dyn Error + Send + Sync>> {
+fn download_video(url: String) -> Result<PathBuf, Box<dyn Error + Send + Sync>> {
     let id = url
         .split("/")
         .last()
