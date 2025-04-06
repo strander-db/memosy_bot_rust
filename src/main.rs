@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     });
     let bot = Bot::from_env();
-    
+
     let admin_id = env::var("ADMIN_ID").expect("ADMIN_ID is not set");
     bot.send_message(admin_id, "Bot started").await?;
     teloxide::repl(bot, move |bot: Bot, msg: Message| async move {
@@ -94,6 +94,8 @@ fn handle_message(msg: &Message) -> Vec<String> {
 }
 
 fn download_video(url: String) -> Result<PathBuf, Box<dyn Error + Send + Sync>> {
+    let referrer = url.split('?').next().unwrap_or(&url).to_string();
+
     let id = url
         .split("/")
         .last()
@@ -107,9 +109,41 @@ fn download_video(url: String) -> Result<PathBuf, Box<dyn Error + Send + Sync>> 
         .arg("best[ext=mp4]/best")
         .arg("-o")
         .arg(format!("{}.mp4", id))
-        .arg(url)
+        .arg("--user-agent")
+        .arg("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+        .arg("--add-header")
+        .arg("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+        .arg("--add-header")
+        .arg("Accept-Language: en-US,en;q=0.9")
+        .arg("--add-header")
+        .arg("Accept-Encoding: gzip, deflate, br")
+        .arg("--add-header")
+        .arg("DNT: 1")
+        .arg("--add-header")
+        .arg("Sec-Fetch-Dest: document")
+        .arg("--add-header")
+        .arg("Sec-Fetch-Mode: navigate")
+        .arg("--add-header")
+        .arg("Sec-Fetch-Site: none")
+        .arg("--add-header")
+        .arg("Sec-Fetch-User: ?1")
+        .arg("--add-header")
+        .arg("Upgrade-Insecure-Requests: 1")
+        .arg("--add-header")
+        .arg("sec-ch-ua: \"Chromium\";v=\"122\", \"Google Chrome\";v=\"122\", \"Not(A:Brand\";v=\"24\"")
+        .arg("--add-header")
+        .arg("sec-ch-ua-mobile: ?0")
+        .arg("--add-header")
+        .arg("sec-ch-ua-platform: \"Windows\"")
+        .arg("--referer")
+        .arg(&referrer)
+        .arg("--add-header")
+        .arg(format!("Origin: {}", referrer.split('/').take(3).collect::<Vec<_>>().join("/")))
+        .arg("--add-header")
+        .arg("Sec-Fetch-Site: same-origin")
         .arg("--impersonate")
         .arg("chrome")
+        .arg(url)
         .status();
     if let Ok(status) = command {
         if status.success() {
