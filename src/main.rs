@@ -4,6 +4,7 @@ use teloxide::{
     prelude::*,
     types::{InputFile, MessageEntity, MessageEntityKind},
 };
+use tokio::time::Instant;
 use yt_dlp::Youtube;
 
 #[tokio::main]
@@ -33,12 +34,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
 }
 
 async fn repl_handler(bot: Bot, msg: Message) -> ResponseResult<()> {
+    let timer = Instant::now();
     let sender = msg.from.clone();
     let sender_url = sender.as_ref().map(|sender| sender.id.url());
     let sender_name = sender.map(|sender| sender.first_name).unwrap_or_default();
-    let urls = handle_message(&msg).await;
+    let urls = handle_message(&msg);
+    log::info!("Handled message in: {:?}", timer.elapsed());
     for url in urls {
         let video = download_video(url.clone()).await;
+        log::info!("Downloaded video in: {:?}", timer.elapsed());
         if let Ok(video) = video {
             let mut send_vid = bot.send_video(msg.chat.id, InputFile::file(video.clone()));
             let is_private = msg.chat.is_private();
@@ -57,6 +61,7 @@ async fn repl_handler(bot: Bot, msg: Message) -> ResponseResult<()> {
                 }
             }
             send_vid.await?;
+            log::info!("Sent video in: {:?}", timer.elapsed());
             if !is_private {
                 bot.delete_message(msg.chat.id, msg.id).await?;
             }
@@ -68,7 +73,7 @@ async fn repl_handler(bot: Bot, msg: Message) -> ResponseResult<()> {
     Ok(())
 }
 
-async fn handle_message(msg: &Message) -> Vec<String> {
+fn handle_message(msg: &Message) -> Vec<String> {
     if msg
         .text()
         .map(|text| text.contains("bot-ignore"))
