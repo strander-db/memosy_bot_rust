@@ -57,7 +57,7 @@ async fn repl_handler(bot: Bot, msg: Message) -> ResponseResult<()> {
                     send_vid = send_vid.caption_entities(vec![MessageEntity::text_link(
                         sender_url.clone(),
                         0,
-                        sender_name.len(),
+                        sender_name.chars().count(),
                     )]);
                 }
             }
